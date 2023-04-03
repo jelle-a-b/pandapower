@@ -351,7 +351,7 @@ def _bfswpf(DLF, bus, gen, branch, baseMVA, Ybus, Sbus, V0, ref, pv, pq, buses_o
         # updating injected currents
         Iinj = np.conj(Sbus / V) - Ysh * V
 
-    return V, converged
+    return V, converged, n_iter
 
 
 def _get_options(options):
@@ -416,7 +416,7 @@ def _run_bfswpf(ppci, options, **kwargs):
         Ybus_noshift = Ybus.copy()
 
     # #-----  run the power flow  -----
-    V_final, success = _bfswpf(DLF, bus, gen, branch, baseMVA, Ybus_noshift,
+    V_final, success, iterations = _bfswpf(DLF, bus, gen, branch, baseMVA, Ybus_noshift,
                                Sbus, V0, ref, pv, pq, buses_ordered_bfs_nets,
                                options, **kwargs)
 
@@ -449,6 +449,7 @@ def _run_bfswpf(ppci, options, **kwargs):
 
     # #----- output results to ppc ------
     ppci["et"] = perf_counter() - time_start  # pf time end
+    ppci["iterations"] = iterations
 
     bus, gen, branch = pfsoln(baseMVA, bus, gen, branch, Ybus, Yf, Yt, V_final, ref, ref_gens)
     # bus, gen, branch = pfsoln_bfsw(baseMVA, bus, gen, branch, V_final, ref, pv, pq, BIBC, ysh_f,ysh_t,Iinj, Sbus)
